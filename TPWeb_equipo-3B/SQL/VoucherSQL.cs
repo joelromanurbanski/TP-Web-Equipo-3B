@@ -15,12 +15,10 @@ namespace SQL
 
         public VoucherSQL()
         {
-            // Lee la cadena de conexión desde Web.config
             connectionString = ConfigurationManager.ConnectionStrings["PromoDB"].ConnectionString;
         }
 
-
-        // Verifica si el código existe en la tabla de Vouchers
+        // Verifica si el código existe
         public bool EsCodigoValido(string codigo)
         {
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -34,45 +32,29 @@ namespace SQL
             }
         }
 
-        // Verifica si el código ya fue usado
+        // Verifica si ya está usado (IdCliente distinto de NULL)
         public bool EstaUsado(string codigo)
         {
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
-                SqlCommand cmd = new SqlCommand("SELECT Usado FROM Vouchers WHERE Codigo = @codigo", con);
+                SqlCommand cmd = new SqlCommand("SELECT IdCliente FROM Vouchers WHERE Codigo = @codigo", con);
                 cmd.Parameters.AddWithValue("@codigo", codigo);
 
                 object result = cmd.ExecuteScalar();
-                if (result != null && result != DBNull.Value)
-                    return Convert.ToBoolean(result);
-
-                return false;
+                return result != null && result != DBNull.Value;
             }
         }
 
-        // Marca un voucher como usado
-        public void MarcarComoUsado(string codigo)
+        // Marca el voucher como usado asignando un cliente
+        public void AsignarCliente(string codigo, int idCliente)
         {
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
-                SqlCommand cmd = new SqlCommand("UPDATE Vouchers SET Usado = 1 WHERE Codigo = @codigo", con);
-                cmd.Parameters.AddWithValue("@codigo", codigo);
-                cmd.ExecuteNonQuery();
-            }
-        }
-
-        // Inserta un voucher nuevo
-        public void AgregarVoucher(string codigo, int idCliente)
-        {
-            using (SqlConnection con = new SqlConnection(connectionString))
-            {
-                con.Open();
-                SqlCommand cmd = new SqlCommand("INSERT INTO Vouchers (Codigo, IdCliente, Usado) VALUES (@codigo, @idCliente, 0)", con);
+                SqlCommand cmd = new SqlCommand("UPDATE Vouchers SET IdCliente = @idCliente WHERE Codigo = @codigo", con);
                 cmd.Parameters.AddWithValue("@codigo", codigo);
                 cmd.Parameters.AddWithValue("@idCliente", idCliente);
-
                 cmd.ExecuteNonQuery();
             }
         }
@@ -85,7 +67,7 @@ namespace SQL
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
-                SqlCommand cmd = new SqlCommand("SELECT Id, Codigo, IdCliente, Usado FROM Vouchers", con);
+                SqlCommand cmd = new SqlCommand("SELECT Id, Codigo, IdCliente FROM Vouchers", con);
                 SqlDataReader reader = cmd.ExecuteReader();
 
                 while (reader.Read())
@@ -93,12 +75,29 @@ namespace SQL
                     Voucher v = new Voucher();
                     v.Id = (int)reader["Id"];
                     v.Codigo = (string)reader["Codigo"];
-                    v.IdCliente = (int)reader["IdCliente"];
-                    v.Usado = (bool)reader["Usado"];
+                    v.IdCliente = reader["IdCliente"] != DBNull.Value ? (int)reader["IdCliente"] : 0;
                     lista.Add(v);
                 }
             }
             return lista;
         }
+
+        // Marca el voucher con cliente y artículo
+        public void UpgradeVoucher(string codigoVoucher, int idCliente, int idArticulo)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlCommand cmd = new SqlCommand(
+                    "UPDATE Vouchers SET IdCliente = @idCliente, IdArticulo = @idArticulo WHERE Codigo = @codigo", con);
+
+                cmd.Parameters.AddWithValue("@codigo", codigoVoucher);
+                cmd.Parameters.AddWithValue("@idCliente", idCliente);
+                cmd.Parameters.AddWithValue("@idArticulo", idArticulo);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+
     }
 }

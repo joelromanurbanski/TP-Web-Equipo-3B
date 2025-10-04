@@ -26,6 +26,9 @@ namespace tp_web_equipo_3b
             string codigo = txtCodigo.Text.Trim();
             VoucherSQL voucherSQL = new VoucherSQL();
 
+            // ⚠️ En un caso real, el idCliente se define al registrarse
+            int idCliente = 1; // valor de prueba, deberías obtenerlo de Session o del registro
+
             if (string.IsNullOrEmpty(codigo))
             {
                 lblError.Text = "Por favor ingresá un código.";
@@ -44,8 +47,13 @@ namespace tp_web_equipo_3b
                 return;
             }
 
-            // ✅ Guardamos el código en sesión y redirigimos a la selección de premio
+            // Asignar el cliente al voucher → marcarlo como usado
+            voucherSQL.AsignarCliente(codigo, idCliente);
+
+            // Guardar en sesión para el siguiente paso
             Session["codigoVoucher"] = codigo;
+
+            // Redirigir a elegir premio
             Response.Redirect("ElegirProducto.aspx");
         }
     }

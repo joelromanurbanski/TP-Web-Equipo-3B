@@ -1,5 +1,6 @@
 ﻿<%@ Page Title="Inicio" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="tp_web_equipo_3b._Default" %>
 
+<!-- 🔹 Bloque de estilos dentro del placeholder "head" -->
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
         .fondo-verde {
@@ -31,7 +32,8 @@
     </style>
 </asp:Content>
 
-<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+<!-- 🔹 Contenido principal dentro de MainContent -->
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <div class="centrar">
         <h2>Ingresá tu código de participación</h2>
         <asp:TextBox ID="txtCodigo" runat="server" CssClass="input-codigo" placeholder="Ej: PROMO123" />
