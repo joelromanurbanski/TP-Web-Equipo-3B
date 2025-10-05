@@ -1,46 +1,26 @@
-﻿<%@ Page Title="Inicio" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="tp_web_equipo_3b._Default" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="tp_web_equipo_3b.Default" %>
 
-<!-- 🔹 Bloque de estilos dentro del placeholder "head" -->
-<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <style>
-        .fondo-verde {
-            background-color: rgba(0, 255, 0, 0.3);
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>Promo Ganá!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+    <form id="form1" runat="server" class="container mt-5">
+        <div class="card shadow p-4">
+            <h3 class="mb-3 text-center">Promo Ganá!</h3>
 
-        .centrar {
-            text-align: center;
-        }
+            <div class="mb-3">
+                <label for="txtVoucher" class="form-label">Ingresá el código de tu voucher!</label>
+                <asp:TextBox ID="txtVoucher" runat="server" CssClass="form-control" placeholder="XXXXXXXXXXXXXXXX" />
+            </div>
 
-        .input-codigo {
-            padding: 10px;
-            font-size: 1.2rem;
-            width: 300px;
-        }
+            <asp:Button ID="btnValidar" runat="server" Text="Siguiente" CssClass="btn btn-primary" OnClick="btnValidar_Click" />
 
-        .btn-participa {
-            background-color: yellow;
-            color: black;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            margin-left: 10px;
-        }
-    </style>
-</asp:Content>
-
-<!-- 🔹 Contenido principal dentro de MainContent -->
-<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <div class="centrar">
-        <h2>Ingresá tu código de participación</h2>
-        <asp:TextBox ID="txtCodigo" runat="server" CssClass="input-codigo" placeholder="Ej: PROMO123" />
-        <asp:Button ID="btnParticipa" runat="server" Text="Participar" CssClass="btn-participa" OnClick="btnParticipa_Click" />
-        
-        <div class="fondo-verde centrar">
-            <asp:Label ID="lblError" runat="server" ForeColor="Red" />
+            <br />
+            <asp:Label ID="lblMensaje" runat="server" CssClass="text-danger mt-3 d-block"></asp:Label>
         </div>
-    </div>
-</asp:Content>
+    </form>
+</body>
+</html>

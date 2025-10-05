@@ -11,7 +11,8 @@ namespace Dominio
         public int Id { get; set; }
         public string Codigo { get; set; }
         public int IdCliente { get; set; }
-        public bool Usado { get; set; }
+        public int IdArticulo { get; set; }  
+        public bool Usado { get; set; }       
     }
 }
 

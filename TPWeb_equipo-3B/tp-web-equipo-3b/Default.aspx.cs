@@ -14,47 +14,27 @@ using WebGrease.Activities;
 
 namespace tp_web_equipo_3b
 {
-    public partial class _Default : Page
+    public partial class Default : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Nada por ahora
         }
 
-        protected void btnParticipa_Click(object sender, EventArgs e)
+        protected void btnValidar_Click(object sender, EventArgs e)
         {
-            string codigo = txtCodigo.Text.Trim();
+            string codigo = txtVoucher.Text.Trim();
             VoucherSQL voucherSQL = new VoucherSQL();
 
-            // ⚠️ En un caso real, el idCliente se define al registrarse
-            int idCliente = 1; // valor de prueba, deberías obtenerlo de Session o del registro
-
-            if (string.IsNullOrEmpty(codigo))
+            if (voucherSQL.CodigoValido(codigo))
             {
-                lblError.Text = "Por favor ingresá un código.";
-                return;
+                // Guardamos el voucher en Session para usarlo en los siguientes pasos
+                Session["voucher"] = codigo;
+                Response.Redirect("ElegirPremio.aspx");
             }
-
-            if (!voucherSQL.EsCodigoValido(codigo))
+            else
             {
-                lblError.Text = "El código ingresado no existe.";
-                return;
+                lblMensaje.Text = "El código ingresado no es válido o ya fue utilizado.";
             }
-
-            if (voucherSQL.EstaUsado(codigo))
-            {
-                lblError.Text = "Este código ya fue utilizado.";
-                return;
-            }
-
-            // Asignar el cliente al voucher → marcarlo como usado
-            voucherSQL.AsignarCliente(codigo, idCliente);
-
-            // Guardar en sesión para el siguiente paso
-            Session["codigoVoucher"] = codigo;
-
-            // Redirigir a elegir premio
-            Response.Redirect("ElegirProducto.aspx");
         }
     }
 }

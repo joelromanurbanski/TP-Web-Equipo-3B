@@ -11,7 +11,23 @@ namespace tp_web_equipo_3b
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!IsPostBack)
+            {
+                if (Session["nombreUsuario"] != null)
+                {
+                    lblMensaje.Text = "¡Bienvenido, " + Session["nombreUsuario"].ToString() + "! Tu registro fue exitoso 🎉";
+                }
+                else
+                {
+                    lblMensaje.Text = "¡Registro exitoso!";
+                }
+            }
+        }
 
+        protected void btnInicio_Click(object sender, EventArgs e)
+        {
+            // Redirige al inicio
+            Response.Redirect("Default.aspx");
         }
     }
 }

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System;
 using Dominio;
 using SQL;
 
@@ -14,63 +13,41 @@ namespace tp_web_equipo_3b
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            // nada en load por ahora
         }
 
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
             try
             {
+                string dni = txtDocumento.Text;
+                string nombre = txtNombre.Text;
+                string apellido = txtApellido.Text;
+                string email = txtEmail.Text;
+                string direccion = txtDireccion.Text;
+                string ciudad = txtCiudad.Text;
+                int cp = int.Parse(txtCP.Text);
+
                 ClienteSQL clienteSQL = new ClienteSQL();
-                string documento = txtDocumento.Text.Trim();
 
-                // Validar si ya existe
-                if (clienteSQL.DniExiste(documento))
+                // Verifica si ya existe el DNI
+                if (!clienteSQL.DniExiste(dni))
                 {
-                    lblMensaje.ForeColor = System.Drawing.Color.Red;
-                    lblMensaje.Text = "⚠ El documento ingresado ya existe en el sistema.";
-                    return;
+                    // Si no existe, agrega cliente nuevo
+                    clienteSQL.AgregarCliente(dni, nombre, apellido, email, direccion, ciudad, cp);
                 }
 
-                // Crear objeto Cliente
-                Cliente cliente = new Cliente
-                {
-                    Documento = documento,
-                    Nombre = txtNombre.Text.Trim(),
-                    Apellido = txtApellido.Text.Trim(),
-                    Email = txtEmail.Text.Trim(),
-                    Direccion = txtDireccion.Text.Trim(),
-                    Ciudad = txtCiudad.Text.Trim(),
-                };
+                // Guardamos en Session el nombre del cliente para mostrarlo en UsuarioRegistrado
+                Session["nombreusuario"] = nombre;
 
-                // Manejar el CP (validación de número)
-                int cp;
-                if (!int.TryParse(txtCP.Text.Trim(), out cp))
-                {
-                    lblMensaje.ForeColor = System.Drawing.Color.Red;
-                    lblMensaje.Text = "⚠ El Código Postal debe ser un número.";
-                    return;
-                }
-                cliente.CP = cp;
-
-                // Insertar en la BD
-                clienteSQL.AgregarCliente(
-                    cliente.Documento,
-                    cliente.Nombre,
-                    cliente.Apellido,
-                    cliente.Email,
-                    cliente.Direccion,
-                    cliente.Ciudad,
-                    cliente.CP
-                );
-
-                lblMensaje.ForeColor = System.Drawing.Color.Green;
-                lblMensaje.Text = "✅ Datos guardados correctamente.";
+                // Redirige a la pantalla de confirmación
+                Response.Redirect("UsuarioRegistrado.aspx");
             }
             catch (Exception ex)
             {
-                lblMensaje.ForeColor = System.Drawing.Color.Red;
-                lblMensaje.Text = "❌ Error: " + ex.Message;
+                lblMensaje.Text = "Ocurrió un error: " + ex.Message;
             }
         }
+
     }
 }
