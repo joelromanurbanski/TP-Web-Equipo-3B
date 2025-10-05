@@ -27,9 +27,9 @@ namespace tp_web_equipo_3b
 
             if (voucherSQL.CodigoValido(codigo))
             {
-                // Guardamos el voucher en Session para usarlo en los siguientes pasos
+                // Guardamos el voucher en Session
                 Session["voucher"] = codigo;
-                Response.Redirect("ElegirPremio.aspx");
+                Response.Redirect("ElegirProducto.aspx");
             }
             else
             {

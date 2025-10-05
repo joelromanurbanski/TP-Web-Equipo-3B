@@ -5,6 +5,8 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SQL;
+using Dominio;
+
 
 namespace tp_web_equipo_3b
 {
@@ -13,29 +15,69 @@ namespace tp_web_equipo_3b
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
-            {
-                // Cargar artículos desde la base
-                ArticuloSQL articuloSQL = new ArticuloSQL();
-                rptArticulos.DataSource = articuloSQL.Listar();
-                rptArticulos.DataBind();
-
-                // Guardar voucher de la página anterior
-                if (Session["codigoVoucher"] == null && Request.QueryString["CodigoVoucher"] != null)
-                {
-                    Session["codigoVoucher"] = Request.QueryString["CodigoVoucher"];
-                }
-            }
+                CargarPremios();
         }
 
-        protected void ElegirArticulo_Command(object sender, CommandEventArgs e)
+        private void CargarPremios()
         {
-            int idArticulo = Convert.ToInt32(e.CommandArgument);
+            List<Articulo> lista = new List<Articulo>();
+            AccesoDatos datos = new AccesoDatos();
 
-            // Guardar selección en sesión
-            Session["articuloSeleccionado"] = idArticulo;
+            try
+            {
+                datos.setearConsulta("SELECT Id, Nombre, Descripcion FROM ARTICULOS");
+                datos.ejecutarLectura();
 
-            // Redirigir a la siguiente página (registro cliente)
-            Response.Redirect("RegistroCliente.aspx");
+                while (datos.Lector.Read())
+                {
+                    Articulo art = new Articulo
+                    {
+                        Id = (int)datos.Lector["Id"],
+                        Nombre = datos.Lector["Nombre"].ToString(),
+                        Descripcion = datos.Lector["Descripcion"].ToString(),
+                        ImagenUrl = "https://via.placeholder.com/200" // ⚡ default si no hay imagen
+                    };
+                    lista.Add(art);
+                }
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+
+            repPremios.DataSource = lista;
+            repPremios.DataBind();
+        }
+
+        protected void repPremios_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName == "Elegir")
+            {
+                if (Session["voucher"] == null)
+                {
+                    lblMensaje.Text = "El voucher no está definido. Volvé al inicio.";
+                    return;
+                }
+
+                string codigo = Session["voucher"].ToString();
+                int idArticulo = int.Parse(e.CommandArgument.ToString());
+
+                // ⚡ por ahora un cliente de prueba
+                int idCliente = 1;
+
+                VoucherSQL voucherSQL = new VoucherSQL();
+                try
+                {
+                    voucherSQL.CanjearVoucher(codigo, idCliente, idArticulo);
+                    lblMensaje.CssClass = "text-success";
+                    lblMensaje.Text = "¡Canje realizado con éxito!";
+                }
+                catch (Exception ex)
+                {
+                    lblMensaje.CssClass = "text-danger";
+                    lblMensaje.Text = "Error al canjear: " + ex.Message;
+                }
+            }
         }
     }
 }

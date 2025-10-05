@@ -6,36 +6,49 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using Dominio;
 
+
 namespace SQL
 {
     public class ArticuloSQL
     {
-        private string connectionString = "Data Source=.;Initial Catalog=PromoDB;Integrated Security=True";
-
         public List<Articulo> Listar()
         {
             List<Articulo> lista = new List<Articulo>();
+            AccesoDatos datos = new AccesoDatos();
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            try
             {
-                con.Open();
-                SqlCommand cmd = new SqlCommand("SELECT Id, Nombre, Descripcion, Precio, ImagenUrl FROM Articulos", con);
-                SqlDataReader reader = cmd.ExecuteReader();
+                datos.setearConsulta(@"
+            SELECT a.Id, a.Nombre, a.Descripcion, a.Precio, i.ImagenUrl
+            FROM ARTICULOS a
+            LEFT JOIN IMAGENES i ON a.Id = i.IdArticulo");
+                datos.ejecutarLectura();
 
-                while (reader.Read())
+                while (datos.Lector.Read())
                 {
-                    Articulo art = new Articulo();
-                    art.Id = (int)reader["Id"];
-                    art.Nombre = (string)reader["Nombre"];
-                    art.Descripcion = (string)reader["Descripcion"];
-                    art.Precio = (decimal)reader["Precio"];
-                    art.ImagenUrl = reader["ImagenUrl"] != DBNull.Value ? (string)reader["ImagenUrl"] : null;
-
+                    Articulo art = new Articulo
+                    {
+                        Id = (int)datos.Lector["Id"],
+                        Nombre = (string)datos.Lector["Nombre"],
+                        Descripcion = (string)datos.Lector["Descripcion"],
+                        Precio = (decimal)datos.Lector["Precio"],
+                        ImagenUrl = datos.Lector["ImagenUrl"] is DBNull ? null : (string)datos.Lector["ImagenUrl"]
+                    };
                     lista.Add(art);
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al listar artículos: " + ex.Message);
+            }
+            finally
+            {
+                datos.cerrarConexion();
             }
 
             return lista;
         }
+
     }
 }
+
