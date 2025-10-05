@@ -27,7 +27,8 @@ namespace SQL
                 datos.setearConsulta("SELECT COUNT(*) FROM Vouchers WHERE CodigoVoucher = @codigo AND IdCliente IS NULL AND IdArticulo IS NULL");
                 datos.setearParametro("@codigo", codigo);
                 object result = datos.ejecutarEscalar();
-                return (int)result > 0;
+
+                return Convert.ToInt32(result) > 0;
             }
             finally
             {
@@ -39,13 +40,21 @@ namespace SQL
         {
             try
             {
-                datos.setearConsulta("UPDATE Vouchers SET IdCliente = @idCliente, IdArticulo = @idArticulo, FechaCanje = @fecha WHERE CodigoVoucher = @codigo AND IdCliente IS NULL AND IdArticulo IS NULL");
+                datos.setearConsulta(@"UPDATE Vouchers 
+                                       SET IdCliente = @idCliente, 
+                                           IdArticulo = @idArticulo, 
+                                           FechaCanje = @fecha 
+                                       WHERE CodigoVoucher = @codigo 
+                                       AND IdCliente IS NULL 
+                                       AND IdArticulo IS NULL");
+
                 datos.setearParametro("@idCliente", idCliente);
                 datos.setearParametro("@idArticulo", idArticulo);
                 datos.setearParametro("@fecha", DateTime.Now);
                 datos.setearParametro("@codigo", codigo);
 
-                int filas = (int)datos.ejecutarAccion();
+                int filas = datos.ejecutarAccion();
+
                 if (filas == 0)
                     throw new Exception("El voucher ya fue canjeado o no es válido.");
             }

@@ -11,14 +11,29 @@
         <div class="container mt-4">
             <h2 class="mb-4">Elegí tu premio 🎁</h2>
             
-            <asp:Repeater ID="repPremios" runat="server" OnItemCommand="repPremios_ItemCommand">
+            <asp:Repeater ID="repPremios" runat="server" 
+                          OnItemCommand="repPremios_ItemCommand" 
+                          OnItemDataBound="repPremios_ItemDataBound">
                 <ItemTemplate>
                     <div class="card d-inline-block m-2" style="width: 18rem;">
-                        <img class="card-img-top" src='<%# Eval("ImagenUrl") %>' alt="Premio" style="height:200px; object-fit:contain;" />
+                        
+                        <!-- Imagen principal -->
+                        <asp:Image ID="imgArticulo" runat="server" CssClass="card-img-top" 
+                                   Style="height:200px; object-fit:contain;" />
+
                         <div class="card-body">
                             <h5 class="card-title"><%# Eval("Nombre") %></h5>
                             <p class="card-text"><%# Eval("Descripcion") %></p>
-                            <asp:Button ID="btnElegir" runat="server" Text="¡Quiero este!" CssClass="btn btn-primary"
+
+                            <!-- ComboBox de imágenes -->
+                            <asp:DropDownList ID="ddlImagenes" runat="server" 
+                                              AutoPostBack="true" 
+                                              CssClass="form-select mb-2"
+                                              OnSelectedIndexChanged="ddlImagenes_SelectedIndexChanged">
+                            </asp:DropDownList>
+
+                            <!-- Botón de selección -->
+                            <asp:Button ID="btnElegir" runat="server" Text="¡Quiero este!" CssClass="btn btn-primary w-100"
                                 CommandName="Elegir" CommandArgument='<%# Eval("Id") %>' />
                         </div>
                     </div>

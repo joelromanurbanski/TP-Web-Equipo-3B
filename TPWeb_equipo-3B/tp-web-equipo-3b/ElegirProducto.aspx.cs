@@ -7,7 +7,6 @@ using System.Web.UI.WebControls;
 using SQL;
 using Dominio;
 
-
 namespace tp_web_equipo_3b
 {
     public partial class ElegirProducto : System.Web.UI.Page
@@ -25,20 +24,39 @@ namespace tp_web_equipo_3b
 
             try
             {
-                datos.setearConsulta("SELECT Id, Nombre, Descripcion FROM ARTICULOS");
+                // Traemos artículos con TODAS sus imágenes
+                datos.setearConsulta(@"
+                    SELECT A.Id, A.Nombre, A.Descripcion, I.ImagenUrl
+                    FROM ARTICULOS A
+                    LEFT JOIN IMAGENES I ON A.Id = I.IdArticulo");
+
                 datos.ejecutarLectura();
+
+                Dictionary<int, Articulo> articulos = new Dictionary<int, Articulo>();
 
                 while (datos.Lector.Read())
                 {
-                    Articulo art = new Articulo
+                    int id = (int)datos.Lector["Id"];
+
+                    // Si el artículo aún no existe en el diccionario, lo agregamos
+                    if (!articulos.ContainsKey(id))
                     {
-                        Id = (int)datos.Lector["Id"],
-                        Nombre = datos.Lector["Nombre"].ToString(),
-                        Descripcion = datos.Lector["Descripcion"].ToString(),
-                        ImagenUrl = "https://via.placeholder.com/200" // ⚡ default si no hay imagen
-                    };
-                    lista.Add(art);
+                        Articulo art = new Articulo
+                        {
+                            Id = id,
+                            Nombre = datos.Lector["Nombre"].ToString(),
+                            Descripcion = datos.Lector["Descripcion"].ToString(),
+                            Imagenes = new List<string>()
+                        };
+                        articulos.Add(id, art);
+                    }
+
+                    // Agregar la imagen si existe
+                    if (!(datos.Lector["ImagenUrl"] is DBNull))
+                        articulos[id].Imagenes.Add(datos.Lector["ImagenUrl"].ToString());
                 }
+
+                lista = articulos.Values.ToList();
             }
             finally
             {
@@ -62,22 +80,42 @@ namespace tp_web_equipo_3b
                 string codigo = Session["voucher"].ToString();
                 int idArticulo = int.Parse(e.CommandArgument.ToString());
 
-                // ⚡ por ahora un cliente de prueba
-                int idCliente = 1;
+                // Guardamos en Session lo necesario para el siguiente paso
+                Session["codigoVoucher"] = codigo;
+                Session["idArticulo"] = idArticulo;
 
-                VoucherSQL voucherSQL = new VoucherSQL();
-                try
-                {
-                    voucherSQL.CanjearVoucher(codigo, idCliente, idArticulo);
-                    lblMensaje.CssClass = "text-success";
-                    lblMensaje.Text = "¡Canje realizado con éxito!";
-                }
-                catch (Exception ex)
-                {
-                    lblMensaje.CssClass = "text-danger";
-                    lblMensaje.Text = "Error al canjear: " + ex.Message;
-                }
+                // Redirigimos a la página para que el cliente ingrese sus datos
+                Response.Redirect("IngresaTusDatos.aspx");
             }
+        }
+
+        protected void repPremios_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        {
+            if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
+            {
+                Articulo art = (Articulo)e.Item.DataItem;
+
+                DropDownList ddl = (DropDownList)e.Item.FindControl("ddlImagenes");
+                Image img = (Image)e.Item.FindControl("imgArticulo");
+
+                ddl.DataSource = art.Imagenes;
+                ddl.DataBind();
+
+                // Mostrar la primera imagen por defecto
+                if (art.Imagenes.Count > 0)
+                    img.ImageUrl = art.Imagenes[0];
+                else
+                    img.ImageUrl = "https://via.placeholder.com/200";
+            }
+        }
+
+        protected void ddlImagenes_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DropDownList ddl = (DropDownList)sender;
+            RepeaterItem item = (RepeaterItem)ddl.NamingContainer;
+
+            Image img = (Image)item.FindControl("imgArticulo");
+            img.ImageUrl = ddl.SelectedValue;
         }
     }
 }

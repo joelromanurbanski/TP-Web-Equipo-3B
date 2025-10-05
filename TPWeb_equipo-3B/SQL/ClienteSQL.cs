@@ -11,45 +11,52 @@ namespace SQL
 {
     public class ClienteSQL
     {
-        private string connectionString;
+        private AccesoDatos datos;
 
         public ClienteSQL()
         {
-            connectionString = ConfigurationManager.ConnectionStrings["PromoDB"].ConnectionString;
+            datos = new AccesoDatos();
         }
 
         // Verifica si el DNI ya existe
         public bool DniExiste(string dni)
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            try
             {
-                con.Open();
-                SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Clientes WHERE Documento = @dni", con);
-                cmd.Parameters.AddWithValue("@dni", dni);
-                int count = (int)cmd.ExecuteScalar();
-                return count > 0;
+                datos.setearConsulta("SELECT COUNT(*) FROM Clientes WHERE Documento = @dni");
+                datos.setearParametro("@dni", dni);
+
+                object result = datos.ejecutarEscalar();
+                return Convert.ToInt32(result) > 0;
+            }
+            finally
+            {
+                datos.cerrarConexion();
             }
         }
 
         // Inserta un nuevo cliente
         public void AgregarCliente(string dni, string nombre, string apellido, string email, string direccion, string ciudad, int cp)
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            try
             {
-                con.Open();
-                SqlCommand cmd = new SqlCommand(
-                    "INSERT INTO Clientes (Documento, Nombre, Apellido, Email, Direccion, Ciudad, CP) " +
-                    "VALUES (@dni, @nombre, @apellido, @correo, @direccion, @ciudad, @cp)", con);
+                datos.setearConsulta(@"INSERT INTO Clientes 
+                                       (Documento, Nombre, Apellido, Email, Direccion, Ciudad, CP) 
+                                       VALUES (@dni, @nombre, @apellido, @correo, @direccion, @ciudad, @cp)");
 
-                cmd.Parameters.AddWithValue("@dni", dni);
-                cmd.Parameters.AddWithValue("@nombre", nombre);
-                cmd.Parameters.AddWithValue("@apellido", apellido);
-                cmd.Parameters.AddWithValue("@correo", email);
-                cmd.Parameters.AddWithValue("@direccion", direccion);
-                cmd.Parameters.AddWithValue("@ciudad", ciudad);
-                cmd.Parameters.AddWithValue("@cp", cp);
+                datos.setearParametro("@dni", dni);
+                datos.setearParametro("@nombre", nombre);
+                datos.setearParametro("@apellido", apellido);
+                datos.setearParametro("@correo", email);
+                datos.setearParametro("@direccion", direccion);
+                datos.setearParametro("@ciudad", ciudad);
+                datos.setearParametro("@cp", cp);
 
-                cmd.ExecuteNonQuery();
+                datos.ejecutarAccion();
+            }
+            finally
+            {
+                datos.cerrarConexion();
             }
         }
 
@@ -57,27 +64,30 @@ namespace SQL
         public Cliente PrellenarDatos(string dni)
         {
             Cliente cliente = null;
-            using (SqlConnection con = new SqlConnection(connectionString))
+            try
             {
-                con.Open();
-                SqlCommand cmd = new SqlCommand("SELECT * FROM Clientes WHERE Documento = @dni", con);
-                cmd.Parameters.AddWithValue("@dni", dni);
-                SqlDataReader reader = cmd.ExecuteReader();
+                datos.setearConsulta("SELECT * FROM Clientes WHERE Documento = @dni");
+                datos.setearParametro("@dni", dni);
+                datos.ejecutarLectura();
 
-                if (reader.Read())
+                if (datos.Lector.Read())
                 {
                     cliente = new Cliente
                     {
-                        Id = (int)reader["Id"],
-                        Documento = reader["Documento"].ToString(),
-                        Nombre = reader["Nombre"].ToString(),
-                        Apellido = reader["Apellido"].ToString(),
-                        Email = reader["Email"].ToString(),
-                        Direccion = reader["Direccion"].ToString(),
-                        Ciudad = reader["Ciudad"].ToString(),
-                        CP = (int)reader["CP"]
+                        Id = (int)datos.Lector["Id"],
+                        Documento = datos.Lector["Documento"].ToString(),
+                        Nombre = datos.Lector["Nombre"].ToString(),
+                        Apellido = datos.Lector["Apellido"].ToString(),
+                        Email = datos.Lector["Email"].ToString(),
+                        Direccion = datos.Lector["Direccion"].ToString(),
+                        Ciudad = datos.Lector["Ciudad"].ToString(),
+                        CP = (int)datos.Lector["CP"]
                     };
                 }
+            }
+            finally
+            {
+                datos.cerrarConexion();
             }
             return cliente;
         }
@@ -85,14 +95,17 @@ namespace SQL
         // Devuelve el IdCliente por DNI
         public int ObtenerIdCliente(string dni)
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            try
             {
-                con.Open();
-                SqlCommand cmd = new SqlCommand("SELECT Id FROM Clientes WHERE Documento = @dni", con);
-                cmd.Parameters.AddWithValue("@dni", dni);
+                datos.setearConsulta("SELECT Id FROM Clientes WHERE Documento = @dni");
+                datos.setearParametro("@dni", dni);
 
-                object result = cmd.ExecuteScalar();
+                object result = datos.ejecutarEscalar();
                 return result != null ? Convert.ToInt32(result) : 0;
+            }
+            finally
+            {
+                datos.cerrarConexion();
             }
         }
     }

@@ -47,7 +47,7 @@ namespace tp_web_equipo_3b
                 if (!string.IsNullOrEmpty(codigoVoucher) && idArticulo > 0)
                 {
                     VoucherSQL voucherSQL = new VoucherSQL();
-                    voucherSQL.UpgradeVoucher(codigoVoucher, idCliente, idArticulo);
+                    voucherSQL.CanjearVoucher(codigoVoucher, idCliente, idArticulo);
                 }
                 else
                 {

@@ -19,15 +19,14 @@ namespace SQL
 
         public AccesoDatos()
         {
-
+            
             conexion = new SqlConnection("server=.\\SQLEXPRESS; database=PROMOS_DB; integrated security=true");
-
             comando = new SqlCommand();
         }
 
         public void setearConsulta(string consulta)
         {
-            comando.CommandType = System.Data.CommandType.Text;
+            comando.CommandType = CommandType.Text;
             comando.CommandText = consulta;
             comando.Parameters.Clear();
         }
@@ -65,7 +64,6 @@ namespace SQL
             }
         }
 
-
         public object ejecutarEscalar()
         {
             comando.Connection = conexion;
@@ -88,7 +86,7 @@ namespace SQL
             }
             finally
             {
-                if (conexion.State != System.Data.ConnectionState.Closed)
+                if (conexion.State != ConnectionState.Closed)
                     conexion.Close();
             }
         }
