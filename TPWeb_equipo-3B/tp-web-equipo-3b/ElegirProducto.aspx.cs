@@ -98,14 +98,24 @@ namespace tp_web_equipo_3b
                 DropDownList ddl = (DropDownList)e.Item.FindControl("ddlImagenes");
                 Image img = (Image)e.Item.FindControl("imgArticulo");
 
-                ddl.DataSource = art.Imagenes;
-                ddl.DataBind();
+                ddl.Items.Clear();
 
-                // Mostrar la primera imagen por defecto
                 if (art.Imagenes.Count > 0)
+                {
+                    int contador = 1;
+                    foreach (string url in art.Imagenes)
+                    {
+                        ddl.Items.Add(new ListItem("Imagen " + contador, url));
+                        contador++;
+                    }
+
                     img.ImageUrl = art.Imagenes[0];
+                }
                 else
-                    img.ImageUrl = "https://via.placeholder.com/200";
+                {
+                    ddl.Items.Add(new ListItem("Sin imagen disponible", "https://via.placeholder.com/200?text=Sin+imagen"));
+                    img.ImageUrl = "https://via.placeholder.com/200?text=Sin+imagen";
+                }
             }
         }
 
